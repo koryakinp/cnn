@@ -48,7 +48,7 @@ namespace Cnn
                             int y = i + k;
                             int x = j + z;
 
-                            if(y < height && x < width && input[y, x] > curMax)
+                            if (y < height && x < width && input[y, x] > curMax)
                             {
                                 curMax = input[y, x];
                                 res.MaxCoordinates[oi * outputWidth + oj] = new Coordinate(y, x);
@@ -64,7 +64,7 @@ namespace Cnn
 
         public static double[][,] Convolute(double[][,] input, double[][,] kernels)
         {
-            if(input.Length != kernels.Length)
+            if (input.Length != kernels.Length)
             {
                 throw new InvalidOperationException("Number of Kernels must be equal to Number of Feature Maps");
             }
@@ -76,7 +76,7 @@ namespace Cnn
                     throw new InvalidOperationException("Convolutional Kernel dimensions are not valid");
                 }
 
-                if (input[i].GetLength(0) < kernels[i].GetLength(0) 
+                if (input[i].GetLength(0) < kernels[i].GetLength(0)
                     || input[i].GetLength(1) < kernels[i].GetLength(1))
                 {
                     throw new InvalidOperationException("Feature Map must be larger than Kernel");
@@ -119,6 +119,25 @@ namespace Cnn
             }
 
             return output;
+        }
+
+        public static double[,] Add(double[,] matrix1, double[,] matrix2)
+        {
+            if (matrix1.GetLength(0) != matrix2.GetLength(0) ||
+                matrix1.GetLength(1) != matrix2.GetLength(1))
+            {
+                throw new Exception("Can not add matrixes with different dimensions.");
+            }
+
+            for (int i = 0; i < matrix1.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix1.GetLength(1); j++)
+                {
+                    matrix1[i, j] += matrix2[i, j];
+                }
+            }
+
+            return matrix1;
         }
     }
 }

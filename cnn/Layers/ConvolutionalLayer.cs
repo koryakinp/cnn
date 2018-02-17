@@ -7,10 +7,12 @@ namespace Cnn.Layers
     internal class ConvolutionalLayer : Layer
     {
         private readonly Kernel[] _kernels;
-        private double[][,] _featureMaps { get; set; }
+        private readonly int _kernelSize;
 
-        public ConvolutionalLayer(int numberOfKernels, int kernelSize, int layerIndex) : base(layerIndex)
+        public ConvolutionalLayer(int numberOfKernels, int kernelSize, int layerIndex) 
+            : base(layerIndex)
         {
+            _kernelSize = kernelSize;
             _kernels = new Kernel[numberOfKernels];
             for (int i = 0; i < numberOfKernels; i++)
             {
@@ -27,7 +29,6 @@ namespace Cnn.Layers
             double[][,] kernels, 
             double[][,] weights) : base(layerIndex)
         {
-            _featureMaps = new double[numberOfKernels][,];
             _kernels = new Kernel[numberOfKernels];
             for (int i = 0; i < numberOfKernels; i++)
             {
@@ -37,23 +38,44 @@ namespace Cnn.Layers
 
         public override Value PassBackward(Value value)
         {
-            throw new NotImplementedException();
+            double[][,] output = new double[_kernels.Length][,];
+
+            for (int i = 0; i < _kernels.Length; i++)
+            {
+                var kernel = _kernels[i];
+                output[i] = new double[_kernelSize, _kernelSize];
+                for (int j = 0; j < kernel.FeatureMaps.Length; j++)
+                {
+                    var delta = MatrixProcessor
+                        .Convolute(kernel.FeatureMaps[j], value.Multi[j]);
+                    output[i] = MatrixProcessor.Add(output[i], delta);
+                }
+
+                for (int q = 0; q < kernel.Gradient.GetLength(0); q++)
+                {
+                    for (int w = 0; w < kernel.Gradient.GetLength(1); w++)
+                    {
+                        kernel.Gradient[q, w] = output[i][q,w];
+                    }
+                }
+            }
+
+            return new MultiValue(output);
         }
 
         public override Value PassForward(Value value)
         {
-            _featureMaps = new double[_kernels.Length * value.Multi.Length][,];
-
             for (int i = 0; i < _kernels.Length; i++)
             {
+                _kernels[i].FeatureMaps = new double[value.Multi.Length][,];
                 for (int j = 0; j < value.Multi.Length; j++)
                 {
-                    _featureMaps[i * j + j] = MatrixProcessor
+                    _kernels[i].FeatureMaps[j] = MatrixProcessor
                         .Convolute(value.Multi[j], _kernels[i].Weights);
                 }
             }
 
-            return new MultiValue(_featureMaps);
+            return new MultiValue(_kernels.SelectMany(q => q.FeatureMaps).ToArray());
         }
     }
 }
