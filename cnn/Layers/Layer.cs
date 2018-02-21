@@ -3,8 +3,11 @@
     internal abstract class Layer
     {
         public readonly int LayerIndex;
-        protected Layer(int layerIndex)
+        public readonly LayerType LayerType;
+
+        protected Layer(int layerIndex, LayerType layerType)
         {
+            LayerType = layerType;
             LayerIndex = layerIndex;
         }
 

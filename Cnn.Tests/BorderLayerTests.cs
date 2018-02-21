@@ -62,7 +62,7 @@ namespace Cnn.Tests
                 bl.PassForward(expected);
                 var actual = bl.PassBackward(input);
 
-                Helper.CompareValues(expected, actual);
+                Helper.CompareMultiValues(expected, actual);
             }
 
             [TestMethod]
@@ -89,7 +89,7 @@ namespace Cnn.Tests
                 var single = bp.PassForward(input);
                 var output = bp.PassBackward(single);
 
-                Helper.CompareValues(input, output);
+                Helper.CompareMultiValues(input, output);
             }
         }
     }

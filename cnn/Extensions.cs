@@ -90,5 +90,12 @@ namespace cnn
             }
             return res;
         }
+
+        public static double[] MultiToSingle(this double[,] input)
+        {
+            double[] output = new double[input.Length];
+            Buffer.BlockCopy(input, 0, output, 0, input.Length);
+            return output;
+        }
     }
 }

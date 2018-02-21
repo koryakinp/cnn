@@ -13,7 +13,6 @@ namespace Cnn.Neurons
         private readonly IActivator _activator;
 
         public IReadOnlyList<Connection> BackwardConnections { get; set; }
-        public IReadOnlyList<Connection> ForwardConnections { get; set; }
 
         public Neuron(IActivator activator)
         {

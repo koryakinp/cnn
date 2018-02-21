@@ -9,7 +9,7 @@ namespace Cnn.Layers
     {
         private double[][,] _featureMaps { get; set; }
 
-        public BorderLayer(int layerIndex) : base(layerIndex) {}
+        public BorderLayer(int layerIndex) : base(layerIndex, LayerType.Border) {}
 
         public override Value PassBackward(Value value)
         {

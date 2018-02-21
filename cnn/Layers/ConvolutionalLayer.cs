@@ -7,10 +7,11 @@ namespace Cnn.Layers
     internal class ConvolutionalLayer : Layer
     {
         private readonly Kernel[] _kernels;
+        private double[][,] _featureMaps;
         private readonly int _kernelSize;
 
         public ConvolutionalLayer(int numberOfKernels, int kernelSize, int layerIndex) 
-            : base(layerIndex)
+            : base(layerIndex, LayerType.Convolutional)
         {
             _kernelSize = kernelSize;
             _kernels = new Kernel[numberOfKernels];
@@ -27,8 +28,9 @@ namespace Cnn.Layers
             int kernelSize, 
             int layerIndex, 
             double[][,] kernels, 
-            double[][,] weights) : base(layerIndex)
+            double[][,] weights) : base(layerIndex, LayerType.Convolutional)
         {
+            _kernelSize = kernelSize;
             _kernels = new Kernel[numberOfKernels];
             for (int i = 0; i < numberOfKernels; i++)
             {
@@ -44,10 +46,9 @@ namespace Cnn.Layers
             {
                 var kernel = _kernels[i];
                 output[i] = new double[_kernelSize, _kernelSize];
-                for (int j = 0; j < kernel.FeatureMaps.Length; j++)
+                for (int j = 0; j < _featureMaps.Length; j++)
                 {
-                    var delta = MatrixProcessor
-                        .Convolute(kernel.FeatureMaps[j], value.Multi[j]);
+                    var delta = MatrixProcessor.Convolute(_featureMaps[j], value.Multi[i * _kernels.Length + j]);
                     output[i] = MatrixProcessor.Add(output[i], delta);
                 }
 
@@ -65,17 +66,17 @@ namespace Cnn.Layers
 
         public override Value PassForward(Value value)
         {
+            _featureMaps = value.Multi;
+            var output = new double[value.Multi.Length * _kernels.Length][,];
             for (int i = 0; i < _kernels.Length; i++)
             {
-                _kernels[i].FeatureMaps = new double[value.Multi.Length][,];
                 for (int j = 0; j < value.Multi.Length; j++)
                 {
-                    _kernels[i].FeatureMaps[j] = MatrixProcessor
-                        .Convolute(value.Multi[j], _kernels[i].Weights);
+                    output[i * value.Multi.Length + j] = MatrixProcessor.Convolute(value.Multi[j], _kernels[i].Weights);
                 }
             }
 
-            return new MultiValue(_kernels.SelectMany(q => q.FeatureMaps).ToArray());
+            return new MultiValue(output);
         }
     }
 }

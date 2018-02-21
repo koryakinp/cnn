@@ -1,5 +1,6 @@
 ﻿using Cnn.Activators;
 using Cnn.Neurons;
+using Cnn.WeightInitializers;
 using System.Collections.Generic;
 
 namespace Cnn
@@ -17,12 +18,15 @@ namespace Cnn
             return output;
         }
 
-        public static List<Connection> CreateConnections(int size, int numberOfInputs)
+        public static List<Connection> CreateConnections(
+            int size, 
+            int numberOfInputs, 
+            IWeightInitializer weightInitializer)
         {
             List<Connection> output = new List<Connection>();
             for (int j = 0; j < size; j++)
             {
-                output.Add(new Connection(numberOfInputs));
+                output.Add(new Connection(numberOfInputs, weightInitializer));
             }
             return output;
         }

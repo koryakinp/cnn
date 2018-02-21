@@ -7,7 +7,6 @@ namespace Cnn
     {
         public readonly double[,] Weights;
         public readonly double[,] Gradient;
-        public double[][,] FeatureMaps;
 
         private double _bias;
 
@@ -22,7 +21,7 @@ namespace Cnn
         {
             _bias = 0;
             Weights = weights;
-            Gradient = deltas;
+            Gradient = new double[weights.GetLength(0),weights.GetLength(1)];
         }
 
         public void RandomizeWeights()

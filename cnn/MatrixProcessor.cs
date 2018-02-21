@@ -62,6 +62,44 @@ namespace Cnn
             return res;
         }
 
+        public static double[,] ReverseMaxPool(
+            double[,] input, 
+            int kernelSize,
+            int originalSize,
+            Coordinate[] maxCoordinates)
+        {
+            var output = new double[originalSize, originalSize];
+
+            for (int i = 0; i < input.GetLength(0); i++)
+            {
+                for (int j = 0; j < input.GetLength(1); j++)
+                {
+                    for (int ki = 0; ki < kernelSize; ki++)
+                    {
+                        for (int ji = 0; ji < kernelSize; ji++)
+                        {
+                            int curX = i * kernelSize + ki;
+                            int curY = j * kernelSize + ji;
+
+                            if (curX >= originalSize) curX = originalSize - 1;
+                            if (curY >= originalSize) curY = originalSize - 1;
+
+                            if (maxCoordinates.Any(q => q.X == curX && q.Y == curY))
+                            {
+                                output[curX, curY] = input[i, j];
+                            }
+                            else
+                            {
+                                output[curX, curY] = 0;
+                            }  
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+
         public static double[][,] Convolute(double[][,] input, double[][,] kernels)
         {
             if (input.Length != kernels.Length)

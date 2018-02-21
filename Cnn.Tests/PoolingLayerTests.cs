@@ -10,27 +10,11 @@ namespace Cnn.Tests
         public class PoolingLayerTests
         {
             [TestMethod]
-            public void ForwardAndBackwardPass()
+            public void PoolingLayerForwardAndBackwardPass()
             {
-                var expected = new MultiValue(new double[][,]
-                {
-                    new double[4,4]
-                    {
-                        { 9,0,0,9 },
-                        { 0,0,0,0 },
-                        { 0,9,0,9 },
-                        { 0,0,0,0 },
-                    },
-                    new double[4,4]
-                    {
-                        { 9,0,0,0 },
-                        { 0,0,0,9 },
-                        { 0,9,0,9 },
-                        { 0,0,0,0 },
-                    }
-                });
+                var layer = new PoolingLayer(2, 1);
 
-                var input = new MultiValue(new double[2][,]
+                var fpActualOutput = layer.PassForward(new MultiValue(new double[2][,]
                 {
                     new double[4,4]
                     {
@@ -46,32 +30,55 @@ namespace Cnn.Tests
                         { 0,6,2,8 },
                         { 3,4,3,2 },
                     }
-                });
-
-                var gradient = new MultiValue(new double[2][,]
+                }));
+                var fpExpectedOutput = new MultiValue(new double[2][,]
                 {
-                    new double[4,4]
+                    new double[2,2]
                     {
-                        { 9,9,9,9 },
-                        { 9,9,9,9 },
-                        { 9,9,9,9 },
-                        { 9,9,9,9 },
+                        { 5,3 },
+                        { 6,8 }
                     },
-                    new double[4,4]
+                    new double[2,2]
                     {
-                        { 9,9,9,9 },
-                        { 9,9,9,9 },
-                        { 9,9,9,9 },
-                        { 9,9,9,9 },
+                        { 5,3 },
+                        { 6,8 }
                     }
                 });
 
-                var layer = new PoolingLayer(2, 1);
+                Helper.CompareMultiValues(fpExpectedOutput, fpActualOutput);
 
-                var fp = layer.PassForward(input);
-                var actual = layer.PassBackward(gradient);
+                var bpActualOutput = layer.PassBackward(new MultiValue(new double[2][,]
+                {
+                    new double[2,2]
+                    {
+                        { 9,9 },
+                        { 9,9 },
+                    },
+                    new double[2,2]
+                    {
+                        { 9,9 },
+                        { 9,9 }
+                    }
+                }));
+                var bpExpectedOutput = new MultiValue(new double[][,]
+{
+                    new double[4,4]
+                    {
+                        { 9,0,0,9 },
+                        { 0,0,0,0 },
+                        { 0,9,0,9 },
+                        { 0,0,0,0 },
+                    },
+                    new double[4,4]
+                    {
+                        { 9,0,0,0 },
+                        { 0,0,0,9 },
+                        { 0,9,0,9 },
+                        { 0,0,0,0 },
+                    }
+});
 
-                Helper.CompareValues(expected, actual);
+                Helper.CompareMultiValues(bpExpectedOutput, bpActualOutput);
             }
         }
     }

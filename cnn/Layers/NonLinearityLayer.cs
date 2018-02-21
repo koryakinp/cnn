@@ -6,7 +6,8 @@ namespace Cnn.Layers
     {
         private readonly IActivator _activator;
 
-        protected NonLinearityLayer(int layerIndex, IActivator activator) : base(layerIndex)
+        protected NonLinearityLayer(int layerIndex, IActivator activator) 
+            : base(layerIndex, LayerType.NonLinearity)
         {
             _activator = activator;
         }

@@ -8,33 +8,37 @@ namespace Cnn.Layers
     {
         private readonly int _kernelSize;
         private Coordinate[][] _maxValuesCoordinates;
+        private double[][,] _inputMaps;
 
-        public PoolingLayer(int kernelSize, int layerIndex) : base(layerIndex)
+        public PoolingLayer(int kernelSize, int layerIndex) : base(layerIndex, LayerType.Pooling)
         {
             _kernelSize = kernelSize;
         }
 
         public override Value PassBackward(Value value)
         {
+            var output = new double[value.Multi.Length][,];
+
             for (int i = 0; i < value.Multi.Length; i++)
             {
-                for (int j = 0; j < value.Multi[i].GetLength(0); j++)
-                {
-                    for (int k = 0; k < value.Multi[i].GetLength(1); k++)
-                    {
-                        if(!_maxValuesCoordinates[i].Any(q => q.X == j && q.Y == k))
-                        {
-                            value.Multi[i][j, k] = 0;
-                        }
-                    }
-                }
+                output[i] = MatrixProcessor.ReverseMaxPool(
+                    value.Multi[i], 
+                    _kernelSize, 
+                    _inputMaps[0].GetLength(0), 
+                    _maxValuesCoordinates[i]);
             }
 
-            return value;
+            return new MultiValue(output);
         }
 
         public override Value PassForward(Value value)
         {
+            _inputMaps = new double[value.Multi.Length][,];
+            for (int i = 0; i < value.Multi.Length; i++)
+            {
+                _inputMaps[i] = new double[value.Multi[i].GetLength(0), value.Multi[i].GetLength(1)];
+            }
+
             var output = new MultiValue(new double[value.Multi.Length][,]);
             _maxValuesCoordinates = new Coordinate[value.Multi.Length][];
 

@@ -10,109 +10,128 @@ namespace Cnn.Tests
         public class ConvolutionalLayerTests
         {
 
-            [TestMethod]
-            public void ForwardAndBackwardPass()
+            private Layer _layer { get; set; }
+            private MultiValue _forwardValue { get; set; }
+
+            [TestInitialize]
+            public void SetUp()
             {
-                var layer = new ConvolutionalLayer(2, 2, 1, new double[2][,]
+                _layer = new ConvolutionalLayer(2, 2, 1, new double[2][,]
                 {
-                    new double[3,3]
+                    new double[2,2]
                     {
-                        { 1,0,1 },
-                        { 0,1,0 },
-                        { 1,0,1 }
+                        { -2,0 },
+                        { -5,3 },
                     },
-                    new double[3,3]
+                    new double[2,2]
                     {
-                        { 1,0,1 },
-                        { 0,1,0 },
-                        { 1,0,1 }
+                        { 7, 5 },
+                        { -4,-6 },
                     },
-                }, null);
+                }, new double[2][,]);
 
-                var actualForwardPassOutput = layer.PassForward(new MultiValue(new double[2][,]
+                _forwardValue = new MultiValue(new double[2][,]
                 {
-                    new double[5,5]
+                    new double[4,4]
                     {
-                        { 1,1,1,0,0 },
-                        { 0,1,1,1,0 },
-                        { 0,0,1,1,1 },
-                        { 0,0,1,1,0 },
-                        { 0,1,1,0,0 }
+                        { -6, 2,-10,-9 },
+                        {  6,-8, 8, 10 },
+                        { -2, 3, -4, 5 },
+                        {  4, 0, -1, 9 }
                     },
-                    new double[5,5]
+                    new double[4,4]
                     {
-                        { 1,1,1,0,0 },
-                        { 0,1,1,1,0 },
-                        { 0,0,1,1,1 },
-                        { 0,0,1,1,0 },
-                        { 0,1,1,0,0 }
-                    },
-                }));
+                        { -10, 8, 1, 2 },
+                        { -2, 4,  6, 9 },
+                        {  5, 10, -7, -5 },
+                        {  3, -3, -9, -6 }
+                    }
+                });
+            }
 
-                var expectedForwardPassOutput = new MultiValue(new double[][,]
+            [TestMethod]
+            public void ForwarPass()
+            {
+                var actual = _layer.PassForward(_forwardValue);
+
+                var expected = new MultiValue(new double[][,]
                 {
                     new double[3,3]
                     {
-                        { 4,3,4 },
-                        { 2,4,3 },
-                        { 2,3,4 }
+                        { -42, 60,  10 },
+                        {  7,  -11, 19 },
+                        { -16, -9,  40 },
+
                     },
                     new double[3,3]
                     {
-                        { 4,3,4 },
-                        { 2,4,3 },
-                        { 2,3,4 }
+                        {  42,  -18, -5 },
+                        {  9,   -79, 8 },
+                        {  -34, -32, 41 }
                     },
                     new double[3,3]
                     {
-                        { 4,3,4 },
-                        { 2,4,3 },
-                        { 2,3,4 }
+                        { -8,  -52, -207 },
+                        { -8,  -4,  92 },
+                        { -15, 7,   -53 },
                     },
                     new double[3,3]
                     {
-                        { 4,3,4 },
-                        { 2,4,3 },
-                        { 2,3,4 }
+                        { -46, 9, -61 },
+                        { -74, 60,  145 },
+                        {  91, 101, -2 },
                     },
                 });
 
-                Helper.CompareValues(expectedForwardPassOutput, actualForwardPassOutput);
+                Helper.CompareMultiValues(expected, actual);
+            }
 
-                var actualBackwardPassOutput = layer.PassBackward(new MultiValue(new double[][,]
+            [TestMethod]
+            public void BackwardPass()
+            {
+                _layer.PassForward(_forwardValue);
+                var actual = _layer.PassBackward(new MultiValue(new double[][,]
                 {
                     new double[3,3]
                     {
-                        { 2,3,5 },
-                        { 2,3,1 },
-                        { 4,1,4 }
+                        { 9, 2, 4 },
+                        { 0, -4,-8 },
+                        { 6, 1, -5 },
                     },
                     new double[3,3]
                     {
-                        { 4,3,4 },
-                        { 2,4,3 },
-                        { 2,3,4 }
+                        { 6, -2, 10 },
+                        { 9,  1, 5},
+                        { -6,-8, 0},
                     },
                     new double[3,3]
                     {
-                        { 2,3,5 },
-                        { 2,3,1 },
-                        { 4,1,4 }
+                        { 8,  2,  3},
+                        { 7, -3,  -1},
+                        { -4,-7,  4},
                     },
                     new double[3,3]
                     {
-                        { 4,3,4 },
-                        { 2,4,3 },
-                        { 2,3,4 }
-                    },
+                        { -6, 5, -1},
+                        { -3, 10, -7},
+                        { 3,  8, -2},
+                    }
                 }));
-
-                var expectedBackwardPass = new MultiValue(new double[][,]
+                var expected = new MultiValue(new double[2][,]
                 {
-                    
+                    new double[2,2]
+                    {
+                        { -271,  -12 },
+                        { 185, 164 },
+                    },
+                    new double[2,2]
+                    {
+                        { 167, -161 },
+                        { 180, -84 },
+                    },
                 });
 
-                //Helper.CompareValues(expectedBackwardPass, actualBackwardPassOutput);
+                Helper.CompareMultiValues(expected, actual);
             }
         }
     }

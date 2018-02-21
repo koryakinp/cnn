@@ -6,7 +6,7 @@ namespace Cnn.CostFunctions
     {
         public double ComputeDeriviative(double target, double output)
         {
-            return target - output;
+            return output - target;
         }
 
         public double ComputeValue(double target, double output)

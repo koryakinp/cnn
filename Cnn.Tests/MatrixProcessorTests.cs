@@ -72,7 +72,7 @@ namespace Cnn.Tests
             [TestMethod]
             public void MaxPoolingTest()
             {
-                var actual = MatrixProcessor.MaxPool(new double[5, 5]
+                var input = MatrixProcessor.MaxPool(new double[5, 5]
                 {
                     { 5,2,1,9,8 },
                     { 3,1,2,3,5 },
@@ -81,40 +81,28 @@ namespace Cnn.Tests
                     { 6,3,1,2,2 }
                 }, 2);
 
-                var expected = new MaxPoolResult
+                var actual = MatrixProcessor.ReverseMaxPool(new double[3, 3]
                 {
-                    Values = new double[3, 3]
-                    {
-                        { 5,9,8 },
-                        { 6,9,1 },
-                        { 6,2,2 }
-                    },
-                    MaxCoordinates = new Coordinate[]
-                    {
-                        new Coordinate(0,0),
-                        new Coordinate(0,3),
-                        new Coordinate(0,4),
-                        new Coordinate(2,1),
-                        new Coordinate(3,2),
-                        new Coordinate(2,4),
-                        new Coordinate(4,0),
-                        new Coordinate(4,3),
-                        new Coordinate(4,4)
-                    }
+                    { 3,3,3 },
+                    { 3,3,3 },
+                    { 3,3,3 }
+                }, 2, 5, input.MaxCoordinates);
+
+                var expected = new double[5, 5]
+                {
+                    { 3,0,0,3,3 },
+                    { 0,0,0,0,0 },
+                    { 0,3,0,0,3 },
+                    { 0,0,3,0,0 },
+                    { 3,0,0,3,3 }
                 };
 
-                for (int i = 0; i < actual.Values.GetLength(0); i++)
+                for (int i = 0; i < actual.GetLength(0); i++)
                 {
-                    for (int j = 0; j < actual.Values.GetLength(1); j++)
+                    for (int j = 0; j < actual.GetLength(1); j++)
                     {
-                        Assert.AreEqual(expected.Values[i, j], actual.Values[i, j]);
+                        Assert.AreEqual(actual[i, j], expected[i, j]);
                     }
-                }
-
-                for (int i = 0; i < actual.MaxCoordinates.Length; i++)
-                {
-                    Assert.AreEqual(actual.MaxCoordinates[i].X, expected.MaxCoordinates[i].X);
-                    Assert.AreEqual(actual.MaxCoordinates[i].Y, expected.MaxCoordinates[i].Y);
                 }
             }
         }
