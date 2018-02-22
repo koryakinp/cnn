@@ -1,23 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Cnn.Layers.Abstract;
+using Cnn.Misc;
 
 namespace Cnn.Layers
 {
-    internal class ConvolutionalLayer : Layer
+    internal class ConvolutionalLayer : FilterLayer
     {
         private readonly Kernel[] _kernels;
         private double[][,] _featureMaps;
         private readonly int _kernelSize;
+        private readonly int _numberOfKernels;
 
-        public ConvolutionalLayer(int numberOfKernels, int kernelSize, int layerIndex) 
-            : base(layerIndex, LayerType.Convolutional)
+
+        public ConvolutionalLayer(
+            int numberOfKernels, 
+            int kernelSize, 
+            int layerIndex, 
+            FilterMeta filterMeta) 
+            : base(layerIndex, LayerType.Convolutional, filterMeta)
         {
+            _numberOfKernels = numberOfKernels;
             _kernelSize = kernelSize;
-            _kernels = new Kernel[numberOfKernels];
+            _kernels = new Kernel[_numberOfKernels];
             for (int i = 0; i < numberOfKernels; i++)
             {
-                var kernel = new Kernel(kernelSize);
+                var kernel = new Kernel(_kernelSize);
                 kernel.RandomizeWeights();
                 _kernels[i] = kernel;
             }
@@ -28,7 +34,8 @@ namespace Cnn.Layers
             int kernelSize, 
             int layerIndex, 
             double[][,] kernels, 
-            double[][,] weights) : base(layerIndex, LayerType.Convolutional)
+            double[][,] weights,
+            FilterMeta filterMeta) : base(layerIndex, LayerType.Convolutional, filterMeta)
         {
             _kernelSize = kernelSize;
             _kernels = new Kernel[numberOfKernels];
@@ -77,6 +84,13 @@ namespace Cnn.Layers
             }
 
             return new MultiValue(output);
+        }
+
+        public override FilterMeta GetOutputFilterMeta()
+        {
+            return new FilterMeta(
+                InputFilterMeta.Size - _kernelSize + 1, 
+                InputFilterMeta.Channels * _numberOfKernels);
         }
     }
 }

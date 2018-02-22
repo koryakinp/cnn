@@ -1,7 +1,7 @@
 namespace Cnn.Tests
 {
-    using System;
     using global::Cnn.Layers;
+    using global::Cnn.Misc;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     namespace Cnn.Tests
@@ -12,7 +12,7 @@ namespace Cnn.Tests
             [TestMethod]
             public void PoolingLayerForwardAndBackwardPass()
             {
-                var layer = new PoolingLayer(2, 1);
+                var layer = new PoolingLayer(2, 1, new FilterMeta(4,2));
 
                 var fpActualOutput = layer.PassForward(new MultiValue(new double[2][,]
                 {

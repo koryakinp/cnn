@@ -1,7 +1,8 @@
 namespace Cnn.Tests
 {
-    using System;
     using global::Cnn.Layers;
+    using global::Cnn.Layers.Abstract;
+    using global::Cnn.Misc;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     namespace Cnn.Tests
@@ -28,7 +29,7 @@ namespace Cnn.Tests
                         { 7, 5 },
                         { -4,-6 },
                     },
-                }, new double[2][,]);
+                }, new double[2][,], new FilterMeta(4, 2));
 
                 _forwardValue = new MultiValue(new double[2][,]
                 {
@@ -50,7 +51,7 @@ namespace Cnn.Tests
             }
 
             [TestMethod]
-            public void ForwarPass()
+            public void ConvolutionalLayerForwarPass()
             {
                 var actual = _layer.PassForward(_forwardValue);
 
@@ -87,7 +88,7 @@ namespace Cnn.Tests
             }
 
             [TestMethod]
-            public void BackwardPass()
+            public void ConvolutionalLayerBackwardPass()
             {
                 _layer.PassForward(_forwardValue);
                 var actual = _layer.PassBackward(new MultiValue(new double[][,]

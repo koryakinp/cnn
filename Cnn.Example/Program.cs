@@ -1,7 +1,6 @@
 ﻿using Cnn.Activators;
 using Cnn.CostFunctions;
-using System.Collections.Generic;
-using System.Linq;
+using Cnn.Misc;
 
 namespace Cnn.Example
 {
@@ -9,14 +8,14 @@ namespace Cnn.Example
     {
         static void Main(string[] args)
         {
-            Network network = new Network(CostFunctionType.Quadratic);
+            var config = new NetworkConfiguration(CostFunctionType.Quadratic, 28, 1);
+            var network = new Network(config);
             network.AddConvolutionalLayer(5,5);
             network.AddPoolingLayer(2);
             network.AddConvolutionalLayer(5,3);
             network.AddPoolingLayer(2);
             network.AddFullyConnectedLayer(5, ActivatorType.LogisticActivator);
             network.AddFullyConnectedLayer(4, ActivatorType.LogisticActivator);
-            network.AddOutputLayer(10, ActivatorType.LogisticActivator);
 
             foreach (var item in MnistReader.ReadTrainingData())
             {

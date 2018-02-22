@@ -1,18 +1,34 @@
-﻿using Cnn.Misc;
+﻿using Cnn.Layers.Abstract;
+using Cnn.Misc;
 using System;
-using System.Linq;
 
 namespace Cnn.Layers
 {
-    internal class PoolingLayer : Layer
+    internal class PoolingLayer : FilterLayer
     {
         private readonly int _kernelSize;
         private Coordinate[][] _maxValuesCoordinates;
         private double[][,] _inputMaps;
 
-        public PoolingLayer(int kernelSize, int layerIndex) : base(layerIndex, LayerType.Pooling)
+        public PoolingLayer(int kernelSize, int layerIndex, FilterMeta filterMeta) 
+            : base(layerIndex, LayerType.Pooling, filterMeta)
         {
             _kernelSize = kernelSize;
+        }
+
+        public override FilterMeta GetOutputFilterMeta()
+        {
+            int size;
+            if(InputFilterMeta.Size % _kernelSize == 0)
+            {
+                size = (int)Math.Pow(InputFilterMeta.Size / _kernelSize, 2);
+            }
+            else
+            {
+                size = (int)Math.Pow(InputFilterMeta.Size / _kernelSize, 2) + 2 * (InputFilterMeta.Size / _kernelSize) + 1;
+            }
+
+            return new FilterMeta(size, InputFilterMeta.Channels);
         }
 
         public override Value PassBackward(Value value)

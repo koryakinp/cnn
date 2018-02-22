@@ -1,6 +1,5 @@
 namespace Cnn.Tests
 {
-    using System;
     using System.Linq;
     using global::Cnn.Activators;
     using global::Cnn.Layers;
@@ -26,7 +25,6 @@ namespace Cnn.Tests
                 network.AddPoolingLayer(2);
                 network.AddFullyConnectedLayer(3, ActivatorType.LogisticActivator);
                 network.AddFullyConnectedLayer(3, ActivatorType.LogisticActivator);
-                network.AddOutputLayer(2, ActivatorType.LogisticActivator);
 
                 var fc = network._layers.OfType<FullyConnectedLayer>();
 

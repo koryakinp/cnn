@@ -1,9 +1,8 @@
-﻿using Cnn;
-using Cnn.Activators;
+﻿using Cnn.Activators;
 using System;
 using System.Collections.Generic;
 
-namespace cnn
+namespace Cnn
 {
     internal static class Extensions
     {

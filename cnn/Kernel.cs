@@ -1,5 +1,4 @@
-﻿using cnn;
-using System;
+﻿using System;
 
 namespace Cnn
 {

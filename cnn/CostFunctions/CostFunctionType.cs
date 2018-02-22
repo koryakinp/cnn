@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Cnn.CostFunctions
+﻿namespace Cnn.CostFunctions
 {
     public enum CostFunctionType
     {

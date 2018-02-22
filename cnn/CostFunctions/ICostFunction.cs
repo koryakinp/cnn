@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Cnn.CostFunctions
+﻿namespace Cnn.CostFunctions
 {
     /// <summary>
     /// A cost function to be used to calculate an error value the output

@@ -1,4 +1,4 @@
-﻿using cnn;
+﻿using Cnn.Layers.Abstract;
 using Cnn.Activators;
 using Cnn.Neurons;
 using Cnn.WeightInitializers;
@@ -9,33 +9,25 @@ namespace Cnn.Layers
 {
     internal class FullyConnectedLayer : Layer
     {
-        protected readonly IActivator _activator;
         public readonly IReadOnlyList<Neuron> Neurons;
-        private readonly IWeightInitializer _weightInitializer;
 
         public FullyConnectedLayer(
             IActivator activator, 
             int numberOfNeurons, 
+            int numberOfNeuronsInPreviouseLayer,
             int layerIndex,
             IWeightInitializer weightInitializer) 
             : base(layerIndex, LayerType.FullyConnected)
         {
-            _weightInitializer = weightInitializer;
-            _activator = activator;
-            Neurons = Utils.CreateNeurons(numberOfNeurons, activator);
+            Neurons = Utils.CreateNeurons(
+                numberOfNeurons, 
+                numberOfNeuronsInPreviouseLayer, 
+                activator,
+                weightInitializer);
         }
 
         public override Value PassForward(Value value)
         {
-            if(Neurons.All(q => q.BackwardConnections == null))
-            {
-                foreach (var neuron in Neurons)
-                {
-                    neuron.BackwardConnections = Utils
-                        .CreateConnections(value.Single.Length, value.Single.Length, _weightInitializer);
-                }
-            }
-
             foreach (var neuron in Neurons)
             {
                 double weightedSum = neuron
@@ -61,6 +53,11 @@ namespace Cnn.Layers
             }
 
             return new SingleValue(deltas);
+        }
+
+        public override int GetNumberOfOutputValues()
+        {
+            return Neurons.Count;
         }
     }
 }

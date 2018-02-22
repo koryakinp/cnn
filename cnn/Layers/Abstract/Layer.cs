@@ -1,4 +1,4 @@
-﻿namespace Cnn.Layers
+﻿namespace Cnn.Layers.Abstract
 {
     internal abstract class Layer
     {
@@ -13,5 +13,6 @@
 
         public abstract Value PassForward(Value value);
         public abstract Value PassBackward(Value value);
+        public abstract int GetNumberOfOutputValues();
     }
 }

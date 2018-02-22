@@ -4,7 +4,7 @@ namespace Cnn.Tests
 {
     internal static class Helper
     {
-        public static void CompareMultiValues(Value expected, Value actual)
+        public static void CompareMultiValues(Value expected, Value actual, double delta = 0.000001)
         {
             for (int i = 0; i < actual.Multi.Length; i++)
             {
@@ -12,7 +12,7 @@ namespace Cnn.Tests
                 {
                     for (int k = 0; k < actual.Multi[i].GetLength(1); k++)
                     {
-                        Assert.AreEqual(actual.Multi[i][j, k], expected.Multi[i][j, k]);
+                        Assert.AreEqual(actual.Multi[i][j, k], expected.Multi[i][j, k], delta);
                     }
                 }
             }

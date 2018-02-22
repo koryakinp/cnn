@@ -1,7 +1,6 @@
 ﻿using Cnn.Activators;
-using System;
+using Cnn.WeightInitializers;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Cnn.Neurons
 {
@@ -12,10 +11,14 @@ namespace Cnn.Neurons
         public double Delta { get; private set; }
         private readonly IActivator _activator;
 
-        public IReadOnlyList<Connection> BackwardConnections { get; set; }
+        public readonly IReadOnlyList<Connection> BackwardConnections;
 
-        public Neuron(IActivator activator)
+        public Neuron(
+            IActivator activator, 
+            IWeightInitializer weightInitializer, 
+            int numberOfConnections)
         {
+            BackwardConnections = Utils.CreateConnections(numberOfConnections, weightInitializer);
             _activator = activator;
         }
 

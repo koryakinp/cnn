@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Cnn
+﻿namespace Cnn
 {
     public abstract class Value
     {

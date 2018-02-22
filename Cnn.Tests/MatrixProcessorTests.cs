@@ -1,7 +1,5 @@
 namespace Cnn.Tests
 {
-    using System;
-    using global::Cnn.Misc;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     namespace Cnn.Tests
