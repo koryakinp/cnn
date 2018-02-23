@@ -1,5 +1,6 @@
 ﻿using Cnn.Layers.Abstract;
 using Cnn.Misc;
+using Cnn.WeightInitializers;
 
 namespace Cnn.Layers
 {
@@ -15,7 +16,8 @@ namespace Cnn.Layers
             int numberOfKernels, 
             int kernelSize, 
             int layerIndex, 
-            FilterMeta filterMeta) 
+            FilterMeta filterMeta,
+            IWeightInitializer weightInitializer) 
             : base(layerIndex, LayerType.Convolutional, filterMeta)
         {
             _numberOfKernels = numberOfKernels;
@@ -24,24 +26,8 @@ namespace Cnn.Layers
             for (int i = 0; i < numberOfKernels; i++)
             {
                 var kernel = new Kernel(_kernelSize);
-                kernel.RandomizeWeights();
+                kernel.RandomizeWeights(weightInitializer);
                 _kernels[i] = kernel;
-            }
-        }
-
-        public ConvolutionalLayer(
-            int numberOfKernels, 
-            int kernelSize, 
-            int layerIndex, 
-            double[][,] kernels, 
-            double[][,] weights,
-            FilterMeta filterMeta) : base(layerIndex, LayerType.Convolutional, filterMeta)
-        {
-            _kernelSize = kernelSize;
-            _kernels = new Kernel[numberOfKernels];
-            for (int i = 0; i < numberOfKernels; i++)
-            {
-                _kernels[i] = new Kernel(kernels[i], weights[i]);
             }
         }
 

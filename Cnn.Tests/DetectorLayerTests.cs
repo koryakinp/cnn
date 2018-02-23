@@ -2,19 +2,28 @@ namespace Cnn.Tests
 {
     using global::Cnn.Activators;
     using global::Cnn.Layers;
+    using global::Cnn.Layers.Abstract;
     using global::Cnn.Misc;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
 
     namespace Cnn.Tests
     {
         [TestClass]
         public class DetectorLayerTests
         {
+            private Layer _layer { get; set; }
+
+            [TestInitialize]
+            public void SetUp()
+            {
+                _layer = new DetectorLayer(1, new LogisticActivator(), new FilterMeta(3, 2));
+            }
+
             [TestMethod]
             public void DetectorLayerForwardPass()
             {
-                var layer = new DetectorLayer(1, new LogisticActivator(), new FilterMeta(3,2));
-                var actual = layer.PassForward(new MultiValue(new double[2][,]
+                var actual = _layer.PassForward(new MultiValue(new double[2][,]
                 {
                     new double[3,3]
                     {
@@ -53,6 +62,13 @@ namespace Cnn.Tests
             public void DetectorLayerBackwardPass()
             {
 
+            }
+
+            [TestMethod]
+            public void NumberOfOutputValuesTest()
+            {
+                var actual = _layer.GetNumberOfOutputValues();
+                Assert.AreEqual(18, actual);
             }
         }
     }

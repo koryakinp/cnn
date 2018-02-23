@@ -39,7 +39,8 @@ namespace Cnn
                     numberOfKernels, 
                     kernelSize, 
                     _layers.Last().LayerIndex + 1,
-                    _layers.OfType<FilterLayer>().Last().GetOutputFilterMeta()));
+                    _layers.OfType<FilterLayer>().Last().GetOutputFilterMeta(),
+                    new WeightInitializer()));
             }
             else
             {
@@ -47,7 +48,8 @@ namespace Cnn
                     numberOfKernels,
                     kernelSize,
                     1,
-                    new FilterMeta(_networkConfig.InputDimenision, _networkConfig.InputChannels)));
+                    new FilterMeta(_networkConfig.InputDimenision, _networkConfig.InputChannels),
+                    new WeightInitializer()));
             }
         }
 

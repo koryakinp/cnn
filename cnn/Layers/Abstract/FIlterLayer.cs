@@ -17,7 +17,7 @@ namespace Cnn.Layers.Abstract
         public override int GetNumberOfOutputValues()
         {
             var fm = GetOutputFilterMeta();
-            return fm.Channels * fm.Size;
+            return fm.Channels * fm.Size * fm.Size;
         }
     }
 }

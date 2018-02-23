@@ -3,6 +3,7 @@ namespace Cnn.Tests
     using System.Linq;
     using global::Cnn.Activators;
     using global::Cnn.Layers;
+    using global::Cnn.Layers.Abstract;
     using global::Cnn.WeightInitializers;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
@@ -12,8 +13,10 @@ namespace Cnn.Tests
         [TestClass]
         public class FullyConnectedLayerTests
         {
-            [TestMethod]
-            public void FullyConnectedLayerForwardPass()
+            private Layer _layer { get; set; }
+
+            [TestInitialize]
+            public void SetUp()
             {
                 var mock = new Mock<IWeightInitializer>();
 
@@ -21,30 +24,45 @@ namespace Cnn.Tests
                     .Setup(q => q.GenerateRandom(It.IsAny<double>()))
                     .Returns(0.10);
 
-                var network = new Network(CostFunctions.CostFunctionType.Quadratic, mock.Object);
-                network.AddPoolingLayer(2);
-                network.AddFullyConnectedLayer(3, ActivatorType.LogisticActivator);
-                network.AddFullyConnectedLayer(3, ActivatorType.LogisticActivator);
+                _layer = new FullyConnectedLayer(
+                    new LogisticActivator(), 5, 10, 1, mock.Object);
+            }
 
-                var fc = network._layers.OfType<FullyConnectedLayer>();
+            [TestMethod]
+            public void FullyConnectedLayerForwardPass()
+            {
+                var actual = _layer.PassForward(new SingleValue(
+                    new double[] { 0.12, 0.29, 0.23, 0.61, 0.11, 0.18, 0.67, 0.23, 0.87, 0.31 }));
 
-                network.TrainModel(new double[2][,]
-                {
-                    new double[4,4]
-                    {
-                        { 1,2,3,4 },
-                        { 4,3,2,1,},
-                        { 1,2,3,4 },
-                        { 4,3,2,1 }
-                    },
-                    new double[4,4]
-                    {
-                        { 5,6,7,8 },
-                        { 8,7,6,5 },
-                        { 5,6,7,8 },
-                        { 8,7,6,5 }
-                    }
-                }, new double[2] { 1,0 });
+                var expected = new SingleValue(
+                    new double[] { 0.589524491, 0.589524491, 0.589524491, 0.589524491, 0.589524491 });
+
+                Helper.CompareSingleValues(actual, expected);
+            }
+
+            [TestMethod]
+            public void FullyConnectedLayerBackwardPass()
+            {
+                _layer.PassForward(new SingleValue(
+                    new double[] { 0.12, 0.29, 0.23, 0.61, 0.11, 0.18, 0.67, 0.23, 0.87, 0.31 }));
+
+                var actual = _layer.PassBackward(new SingleValue(
+                    new double[] { 0.51, 0.30, 0.14, 0.18, 0.29 }));
+
+                var expected = new SingleValue(
+                    new double[] {
+                        0.034361922, 0.034361922, 0.034361922, 0.034361922, 0.034361922,
+                        0.034361922, 0.034361922, 0.034361922, 0.034361922, 0.034361922
+                    });
+
+                Helper.CompareSingleValues(actual, expected);
+            }
+
+            [TestMethod]
+            public void NumberOfOutputValuesTest()
+            {
+                var actual = _layer.GetNumberOfOutputValues();
+                Assert.AreEqual(5, actual);
             }
         }
     }

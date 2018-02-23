@@ -1,6 +1,7 @@
 namespace Cnn.Tests
 {
     using global::Cnn.Layers;
+    using global::Cnn.Layers.Abstract;
     using global::Cnn.Misc;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,12 +10,18 @@ namespace Cnn.Tests
         [TestClass]
         public class PoolingLayerTests
         {
+            private Layer _layer { get; set; }
+
+            [TestInitialize]
+            public void SetUp()
+            {
+                _layer = new PoolingLayer(2, 1, new FilterMeta(4, 2));
+            }
+
             [TestMethod]
             public void PoolingLayerForwardAndBackwardPass()
             {
-                var layer = new PoolingLayer(2, 1, new FilterMeta(4,2));
-
-                var fpActualOutput = layer.PassForward(new MultiValue(new double[2][,]
+                var fpActualOutput = _layer.PassForward(new MultiValue(new double[2][,]
                 {
                     new double[4,4]
                     {
@@ -47,7 +54,7 @@ namespace Cnn.Tests
 
                 Helper.CompareMultiValues(fpExpectedOutput, fpActualOutput);
 
-                var bpActualOutput = layer.PassBackward(new MultiValue(new double[2][,]
+                var bpActualOutput = _layer.PassBackward(new MultiValue(new double[2][,]
                 {
                     new double[2,2]
                     {
@@ -79,6 +86,14 @@ namespace Cnn.Tests
 });
 
                 Helper.CompareMultiValues(bpExpectedOutput, bpActualOutput);
+            }
+
+            [TestMethod]
+            public void NumberOfOutputValuesTest()
+            {
+                Assert.AreEqual(125, new PoolingLayer(3, 1, new FilterMeta(13, 5)).GetNumberOfOutputValues());
+                Assert.AreEqual(12, new PoolingLayer(5, 1, new FilterMeta(7, 3)).GetNumberOfOutputValues());
+                Assert.AreEqual(200, new PoolingLayer(10, 1, new FilterMeta(100, 2)).GetNumberOfOutputValues());
             }
         }
     }

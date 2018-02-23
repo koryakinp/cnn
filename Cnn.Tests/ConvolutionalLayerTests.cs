@@ -3,7 +3,10 @@ namespace Cnn.Tests
     using global::Cnn.Layers;
     using global::Cnn.Layers.Abstract;
     using global::Cnn.Misc;
+    using global::Cnn.WeightInitializers;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
+    using System.Collections.Generic;
 
     namespace Cnn.Tests
     {
@@ -17,19 +20,15 @@ namespace Cnn.Tests
             [TestInitialize]
             public void SetUp()
             {
-                _layer = new ConvolutionalLayer(2, 2, 1, new double[2][,]
-                {
-                    new double[2,2]
-                    {
-                        { -2,0 },
-                        { -5,3 },
-                    },
-                    new double[2,2]
-                    {
-                        { 7, 5 },
-                        { -4,-6 },
-                    },
-                }, new double[2][,], new FilterMeta(4, 2));
+                var mock = new Mock<IWeightInitializer>();
+
+                var queue = new Queue<double>(new double[] { -2, 0, -5, 3, 7, 5, -4, -6 });
+
+                mock
+                    .Setup(q => q.GenerateRandom(It.IsAny<double>()))
+                    .Returns(queue.Dequeue);
+
+                _layer = new ConvolutionalLayer(2, 2, 1, new FilterMeta(4, 2), mock.Object);
 
                 _forwardValue = new MultiValue(new double[2][,]
                 {
@@ -133,6 +132,13 @@ namespace Cnn.Tests
                 });
 
                 Helper.CompareMultiValues(expected, actual);
+            }
+
+            [TestMethod]
+            public void NumberOfOutputValuesTest()
+            {
+                var actual = _layer.GetNumberOfOutputValues();
+                Assert.AreEqual(36, actual);
             }
         }
     }

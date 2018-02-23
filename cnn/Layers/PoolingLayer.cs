@@ -21,11 +21,11 @@ namespace Cnn.Layers
             int size;
             if(InputFilterMeta.Size % _kernelSize == 0)
             {
-                size = (int)Math.Pow(InputFilterMeta.Size / _kernelSize, 2);
+                size = InputFilterMeta.Size / _kernelSize;
             }
             else
             {
-                size = (int)Math.Pow(InputFilterMeta.Size / _kernelSize, 2) + 2 * (InputFilterMeta.Size / _kernelSize) + 1;
+                size = InputFilterMeta.Size / _kernelSize + 1;
             }
 
             return new FilterMeta(size, InputFilterMeta.Channels);

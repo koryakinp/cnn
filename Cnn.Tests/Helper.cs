@@ -18,11 +18,11 @@ namespace Cnn.Tests
             }
         }
 
-        public static void CompareSingleValues(Value expected, Value actual)
+        public static void CompareSingleValues(Value expected, Value actual, double delta = 0.000001)
         {
             for (int i = 0; i < actual.Single.Length; i++)
             {
-                Assert.AreEqual(actual.Single[i], expected.Single[i]);
+                Assert.AreEqual(actual.Single[i], expected.Single[i], delta);
             }
         }
 

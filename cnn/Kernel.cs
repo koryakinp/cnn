@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cnn.WeightInitializers;
+using System;
 
 namespace Cnn
 {
@@ -23,10 +24,18 @@ namespace Cnn
             Gradient = new double[weights.GetLength(0),weights.GetLength(1)];
         }
 
-        public void RandomizeWeights()
+        public void RandomizeWeights(IWeightInitializer weightInitializer)
         {
-            double magnitude = 1 / Math.Sqrt(Weights.GetLength(0) * Weights.GetLength(1));
-            Weights.Randomize(magnitude);
+            int inputs = Weights.GetLength(0) * Weights.GetLength(1);
+            double magnitude = Math.Sqrt((double)1/inputs);
+
+            for (int i = 0; i < Weights.GetLength(0); i++)
+            {
+                for (int j = 0; j < Weights.GetLength(1); j++)
+                {
+                    Weights[i, j] = weightInitializer.GenerateRandom(magnitude);
+                }
+            }
         }
 
         public double GetBias()
