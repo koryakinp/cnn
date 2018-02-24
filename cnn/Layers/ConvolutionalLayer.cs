@@ -66,7 +66,16 @@ namespace Cnn.Layers
             {
                 for (int j = 0; j < value.Multi.Length; j++)
                 {
-                    output[i * value.Multi.Length + j] = MatrixProcessor.Convolute(value.Multi[j], _kernels[i].Weights);
+                    output[i * value.Multi.Length + j] = 
+                        MatrixProcessor.Convolute(value.Multi[j], _kernels[i].Weights);
+
+                    for (int z = 0; z < output[i * value.Multi.Length + j].GetLength(0); z++)
+                    {
+                        for (int k = 0; k < output[i * value.Multi.Length + j].GetLength(1); k++)
+                        {
+                            output[i * value.Multi.Length + j][z, k] += _kernels[i].Bias;
+                        }
+                    }
                 }
             }
 
@@ -100,15 +109,15 @@ namespace Cnn.Layers
             {
                 double biasDelta = 0;
 
-                for (int i = 0; i < kernel.Gradient.GetLength(i); i++)
+                for (int i = 0; i < kernel.Gradient.GetLength(0); i++)
                 {
-                    for (int j = 0; j < kernel.Gradient.GetLength(j); j++)
+                    for (int j = 0; j < kernel.Gradient.GetLength(1); j++)
                     {
                         biasDelta += kernel.Gradient[i, j];
                     }
                 }
 
-                kernel.Bias += kernel.Bias * biasDelta * learningRate;
+                kernel.Bias += biasDelta * learningRate;
             }
         }
     }

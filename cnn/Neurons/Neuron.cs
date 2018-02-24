@@ -7,7 +7,7 @@ namespace Cnn.Neurons
     internal class Neuron
     {
         public double Output { get; private set; }
-        public double Bias { get; private set; }
+        public double Bias { get; set; }
         public double Delta { get; private set; }
         private readonly IActivator _activator;
 

@@ -63,12 +63,21 @@ namespace Cnn.Layers
 
         public void UpdateWeights(double learningRate)
         {
-            throw new System.NotImplementedException();
+            foreach (var neuron in Neurons)
+            {
+                foreach (var connection in neuron.BackwardConnections)
+                {
+                    connection.Weight += connection.Weight * neuron.Delta * learningRate;
+                }
+            }
         }
 
         public void UpdateBiases(double learningRate)
         {
-            throw new System.NotImplementedException();
+            foreach (var neuron in Neurons)
+            {
+                neuron.Bias += neuron.Delta * learningRate;
+            }
         }
     }
 }
