@@ -4,10 +4,11 @@ using Cnn.Neurons;
 using Cnn.WeightInitializers;
 using System.Collections.Generic;
 using System.Linq;
+using Cnn.Layers.Interfaces;
 
 namespace Cnn.Layers
 {
-    internal class FullyConnectedLayer : Layer
+    internal class FullyConnectedLayer : Layer, ILearnableLayer
     {
         public readonly IReadOnlyList<Neuron> Neurons;
 
@@ -58,6 +59,16 @@ namespace Cnn.Layers
         public override int GetNumberOfOutputValues()
         {
             return Neurons.Count;
+        }
+
+        public void UpdateWeights(double learningRate)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void UpdateBiases(double learningRate)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

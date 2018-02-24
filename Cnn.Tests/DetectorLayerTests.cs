@@ -14,6 +14,38 @@ namespace Cnn.Tests
         {
             private Layer _layer { get; set; }
 
+            private readonly MultiValue input = new MultiValue(new double[2][,]
+            {
+                new double[3, 3]
+                {
+                    { 4, 5, 7 },
+                    { -1, 4, -3 },
+                    { 2, 0, -6 }
+                },
+                new double[3, 3]
+                {
+                    { -10, 8, -1, },
+                    {   8, -9,-7 },
+                    {  8,  7, -6 },
+                }
+            });
+
+            private readonly MultiValue delta = new MultiValue(new double[2][,]
+            {
+                new double[3, 3]
+                {
+                    { -2, 2, 0 },
+                    { 5, -5, 1 },
+                    { -8, -7, 8 }
+                },
+                new double[3, 3]
+                {
+                    { 7, 3, 9, },
+                    { 6, -3,-9 },
+                    { 4, -4, -6 },
+                }
+            });
+
             [TestInitialize]
             public void SetUp()
             {
@@ -23,21 +55,7 @@ namespace Cnn.Tests
             [TestMethod]
             public void DetectorLayerForwardPass()
             {
-                var actual = _layer.PassForward(new MultiValue(new double[2][,]
-                {
-                    new double[3,3]
-                    {
-                        { 4, 5, 7 },
-                        { -1, 4, -3 },
-                        { 2, 0, -6 }
-                    },
-                    new double[3,3]
-                    {
-                        { -10, 8, -1, },
-                        {   8, -9,-7 },
-                        {  8,  7, -6 },
-                    }
-                }));
+                var actual = _layer.PassForward(input);
 
                 var expected = new MultiValue(new double[2][,]
                 {
@@ -61,7 +79,26 @@ namespace Cnn.Tests
             [TestMethod]
             public void DetectorLayerBackwardPass()
             {
+                _layer.PassForward(input);
+                var actual = _layer.PassBackward(delta);
 
+                var expected = new MultiValue(new double[2][,]
+                {
+                    new double[3,3]
+                    {
+                        { -0.035325412,  0.013296113, 0          },
+                        {  0.983059666, -0.088313531, 0.04517666 },
+                        { -0.839948683, -1.75,        0.01973207 },
+                    },
+                    new double[3,3]
+                    {
+                        { 0.000317771,  0.001005713, 1.769507399  },
+                        { 0.002011426, -0.000370138, -0.008191991 },
+                        { 0.001340951, -0.003640885, -0.014799056 },
+                    },
+                });
+
+                Helper.CompareMultiValues(expected, actual);
             }
 
             [TestMethod]

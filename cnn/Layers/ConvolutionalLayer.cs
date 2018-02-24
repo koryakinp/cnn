@@ -1,10 +1,11 @@
 ﻿using Cnn.Layers.Abstract;
+using Cnn.Layers.Interfaces;
 using Cnn.Misc;
 using Cnn.WeightInitializers;
 
 namespace Cnn.Layers
 {
-    internal class ConvolutionalLayer : FilterLayer
+    internal class ConvolutionalLayer : FilterLayer, ILearnableLayer
     {
         private readonly Kernel[] _kernels;
         private double[][,] _featureMaps;
@@ -77,6 +78,38 @@ namespace Cnn.Layers
             return new FilterMeta(
                 InputFilterMeta.Size - _kernelSize + 1, 
                 InputFilterMeta.Channels * _numberOfKernels);
+        }
+
+        public void UpdateWeights(double learningRate)
+        {
+            foreach (var kernel in _kernels)
+            {
+                for (int i = 0; i < kernel.Weights.GetLength(0); i++)
+                {
+                    for (int j = 0; j < kernel.Weights.GetLength(1); j++)
+                    {
+                        kernel.Weights[i, j] += kernel.Weights[i, j] * kernel.Gradient[i, j] * learningRate;
+                    }
+                }
+            }
+        }
+
+        public void UpdateBiases(double learningRate)
+        {
+            foreach (var kernel in _kernels)
+            {
+                double biasDelta = 0;
+
+                for (int i = 0; i < kernel.Gradient.GetLength(i); i++)
+                {
+                    for (int j = 0; j < kernel.Gradient.GetLength(j); j++)
+                    {
+                        biasDelta += kernel.Gradient[i, j];
+                    }
+                }
+
+                kernel.Bias += kernel.Bias * biasDelta * learningRate;
+            }
         }
     }
 }

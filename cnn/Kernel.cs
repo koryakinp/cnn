@@ -7,21 +7,13 @@ namespace Cnn
     {
         public readonly double[,] Weights;
         public readonly double[,] Gradient;
-
-        private double _bias;
+        public double BiasGradient;
+        public double Bias;
 
         public Kernel(int size)
         {
-            _bias = 0;
             Weights = new double[size, size];
             Gradient = new double[size, size];
-        }
-
-        public Kernel(double[,] weights, double[,] deltas)
-        {
-            _bias = 0;
-            Weights = weights;
-            Gradient = new double[weights.GetLength(0),weights.GetLength(1)];
         }
 
         public void RandomizeWeights(IWeightInitializer weightInitializer)
@@ -36,11 +28,6 @@ namespace Cnn
                     Weights[i, j] = weightInitializer.GenerateRandom(magnitude);
                 }
             }
-        }
-
-        public double GetBias()
-        {
-            return _bias;
         }
     }
 }
