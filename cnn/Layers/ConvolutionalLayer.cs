@@ -12,7 +12,6 @@ namespace Cnn.Layers
         private readonly int _kernelSize;
         private readonly int _numberOfKernels;
 
-
         public ConvolutionalLayer(
             int numberOfKernels, 
             int kernelSize, 
@@ -34,6 +33,8 @@ namespace Cnn.Layers
 
         public override Value PassBackward(Value value)
         {
+            value = ConvertToMulti(value);
+
             double[][,] output = new double[_kernels.Length][,];
 
             for (int i = 0; i < _kernels.Length; i++)

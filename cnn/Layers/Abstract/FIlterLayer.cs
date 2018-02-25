@@ -19,5 +19,17 @@ namespace Cnn.Layers.Abstract
             var fm = GetOutputFilterMeta();
             return fm.Channels * fm.Size * fm.Size;
         }
+
+        protected Value ConvertToMulti(Value value)
+        {
+            if (!value.IsMulti)
+            {
+                return value.ToMulti(InputFilterMeta.Size, InputFilterMeta.Channels);
+            }
+            else
+            {
+                return value;
+            }
+        }
     }
 }

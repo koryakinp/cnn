@@ -35,6 +35,8 @@ namespace Cnn.Layers
 
         public override Value PassBackward(Value value)
         {
+            value = ConvertToMulti(value);
+
             var output = new double[value.Multi.Length][,];
 
             for (int i = 0; i < value.Multi.Length; i++)

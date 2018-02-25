@@ -1,4 +1,5 @@
-﻿using Cnn.Layers.Abstract;
+﻿
+using Cnn.Layers.Abstract;
 using Cnn.Activators;
 using Cnn.Neurons;
 using Cnn.WeightInitializers;
@@ -29,6 +30,11 @@ namespace Cnn.Layers
 
         public override Value PassForward(Value value)
         {
+            if(value.IsMulti)
+            {
+                value = value.ToSingle();
+            }
+
             foreach (var neuron in Neurons)
             {
                 double weightedSum = neuron

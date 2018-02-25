@@ -96,5 +96,34 @@ namespace Cnn
             Buffer.BlockCopy(input, 0, output, 0, input.Length);
             return output;
         }
+
+
+        public static void ForEach(this double[,,] source, Action<double, int, int, int> action)
+        {
+            for (int d = 0; d < source.GetLength(0); d++)
+            {
+                for (int w = 0; w < source.GetLength(1); w++)
+                {
+                    for (int h = 0; h < source.GetLength(2); h++)
+                    {
+                        action(source[d, w, h], d, w, h);
+                    }
+                }
+            }
+        }
+
+        public static void ForEach(this double[,,] source, Action<int, int, int> action)
+        {
+            for (int d = 0; d < source.GetLength(0); d++)
+            {
+                for (int w = 0; w < source.GetLength(1); w++)
+                {
+                    for (int h = 0; h < source.GetLength(2); h++)
+                    {
+                        action(d, w, h);
+                    }
+                }
+            }
+        }
     }
 }

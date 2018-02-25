@@ -1,5 +1,6 @@
 ﻿using Cnn.Activators;
 using Cnn.CostFunctions;
+using Cnn.LearningRateDecayers;
 using Cnn.Misc;
 
 namespace Cnn.Example
@@ -8,12 +9,19 @@ namespace Cnn.Example
     {
         static void Main(string[] args)
         {
-            var config = new NetworkConfiguration(CostFunctionType.Quadratic, 28, 1);
+            var config = new NetworkConfiguration(
+                CostFunctionType.Quadratic,
+                new FlatDecayer(0.5),
+                28, 1);
+
             var network = new Network(config);
+
             network.AddConvolutionalLayer(5,5);
             network.AddPoolingLayer(2);
+            network.AddDetectorLayer(ActivatorType.LogisticActivator);
             network.AddConvolutionalLayer(5,3);
             network.AddPoolingLayer(2);
+            network.AddDetectorLayer(ActivatorType.LogisticActivator);
             network.AddFullyConnectedLayer(5, ActivatorType.LogisticActivator);
             network.AddFullyConnectedLayer(4, ActivatorType.LogisticActivator);
 
