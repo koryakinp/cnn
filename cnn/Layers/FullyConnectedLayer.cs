@@ -19,7 +19,7 @@ namespace Cnn.Layers
             int numberOfNeuronsInPreviouseLayer,
             int layerIndex,
             IWeightInitializer weightInitializer) 
-            : base(layerIndex, LayerType.FullyConnected)
+            : base(layerIndex)
         {
             Neurons = Utils.CreateNeurons(
                 numberOfNeurons, 

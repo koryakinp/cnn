@@ -27,7 +27,17 @@ namespace Cnn.Example
 
             foreach (var item in MnistReader.ReadTrainingData())
             {
-                var input = new double[][,] { item.Data.ConvertPixels() };
+                var data = item.Data.ConvertPixels();
+                var input = new double[1, data.GetLength(0), data.GetLength(1)];
+
+                for (int i = 0; i < data.GetLength(0); i++)
+                {
+                    for (int j = 0; j < data.GetLength(1); j++)
+                    {
+                        input[1, i, j] = data[i, j];
+                    }
+                }
+
                 var error = network.TrainModel(input, GetTargetOutput(item.Label));
             }
         }

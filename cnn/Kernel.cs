@@ -5,29 +5,22 @@ namespace Cnn
 {
     internal class Kernel
     {
-        public readonly double[,] Weights;
-        public readonly double[,] Gradient;
+        public readonly double[,,] Weights;
+        public readonly double[,,] Gradient;
         public double BiasGradient;
         public double Bias;
 
-        public Kernel(int size)
+        public Kernel(int size, int depth)
         {
-            Weights = new double[size, size];
-            Gradient = new double[size, size];
+            Weights = new double[depth, size, size];
+            Gradient = new double[depth, size, size];
         }
 
         public void RandomizeWeights(IWeightInitializer weightInitializer)
         {
-            int inputs = Weights.GetLength(0) * Weights.GetLength(1);
+            int inputs = Weights.GetLength(0) * Weights.GetLength(1) * Weights.GetLength(2);
             double magnitude = Math.Sqrt((double)1/inputs);
-
-            for (int i = 0; i < Weights.GetLength(0); i++)
-            {
-                for (int j = 0; j < Weights.GetLength(1); j++)
-                {
-                    Weights[i, j] = weightInitializer.GenerateRandom(magnitude);
-                }
-            }
+            Weights.ForEach((i, j, k) => Weights[i, j, k] = weightInitializer.GenerateRandom(magnitude));
         }
     }
 }

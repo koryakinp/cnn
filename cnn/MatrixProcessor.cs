@@ -7,6 +7,97 @@ namespace Cnn
 {
     internal static class MatrixProcessor
     {
+        public static (double[,,], bool[,,]) MaxPool(double[,,] input, int kernelSize)
+        {
+            int size = input.GetLength(1) % kernelSize == 0
+                ? input.GetLength(1) / kernelSize
+                : (input.GetLength(1) / kernelSize) + 1;
+
+            var max = new bool[input.GetLength(0), input.GetLength(1), input.GetLength(2)];
+            var output = new double[input.GetLength(0), size, size];
+
+            for (int i = 0; i < input.GetLength(0); i++)
+            {
+                for (int j = 0, jj = 0; j < input.GetLength(1); j += kernelSize, jj++)
+                {
+                    for (int k = 0, kk = 0; k < input.GetLength(2); k += kernelSize, kk++)
+                    {
+                        var res = GetMax(i, j, k, kernelSize, input);
+                        output[i, jj, kk] = res.max;
+                        max[i, res.x, res.y] = true;
+                    }
+                }
+            }
+
+            return (output, max);
+        }
+
+        public static double[,] Convolute(double[,,] input, double[,,] kernels)
+        {
+            int outputSize = input.GetLength(1) - kernels.GetLength(2) + 1;
+            int kernelSize = kernels.GetLength(2);
+            int inputSize = input.GetLength(1);
+
+            var output = new double[outputSize, outputSize];
+
+            for (int i = 0; i < kernels.GetLength(0); i++)
+            {
+                for (int j = 0; j <= inputSize - kernelSize; j++)
+                {
+                    for (int k = 0; k <= inputSize - kernelSize; k++)
+                    {
+                        for (int jj = 0; jj < kernelSize; jj++)
+                        {
+                            for (int kk = 0; kk < kernelSize; kk++)
+                            {
+                                output[j, k] += input[i, j + jj, k + kk] * kernels[i, jj, kk];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return output;
+        }
+
+        private static double Convolute(int i, int j, int k, double[,,] input, double[,,] kernels, int kernel)
+        {
+            int size = kernels.GetLength(1);
+            double output = 0;
+
+            for (int jj = 0; j < j + size; j++, jj++)
+            {
+                for (int kk = 0; k < k + size; k++, kk++)
+                {
+                    output += input[i, j, k] * kernels[kernel, jj, kk];
+                }
+            }
+
+            return output;
+        }
+
+        private static (double max, int x, int y) GetMax(int i, int j, int k, int size, double[,,] arr)
+        {
+            double max = double.MinValue;
+            int x = 0;
+            int y = 0;
+
+            for (int jj = j; jj < j + size && jj < arr.GetLength(1); jj++)
+            {
+                for (int kk = k; kk < k + size && kk < arr.GetLength(2); kk++)
+                {
+                    if (arr[i, jj, kk] > max)
+                    {
+                        max = arr[i, jj, kk];
+                        x = jj;
+                        y = kk;
+                    }
+                }
+            }
+
+            return (max, x, y);
+        }
+
         public static List<MaxPoolResult> MaxPool(double[][,] input, int kernelSize)
         {
             int height = input[0].GetLength(0);
@@ -62,11 +153,25 @@ namespace Cnn
             return res;
         }
 
-        public static double[,] ReverseMaxPool(
-            double[,] input, 
-            int kernelSize,
-            int originalSize,
-            Coordinate[] maxCoordinates)
+        public static double[,,] ReverseMaxPool(double[,,] input, bool[,,] max, int kernelSize)
+        {
+            var output = new double[max.GetLength(0), max.GetLength(1), max.GetLength(2)];
+
+            output.ForEach((k, i, j) =>
+            {
+                if (max[k, i, j])
+                {
+                    int ii = i / kernelSize;
+                    int jj = j / kernelSize;
+
+                    output[k, i, j] = input[k, ii, jj];
+                }
+            });
+
+            return output;
+        }
+
+        public static double[,] ReverseMaxPool(double[,] input, int kernelSize, int originalSize, Coordinate[] maxCoordinates)
         {
             var output = new double[originalSize, originalSize];
 
@@ -91,7 +196,7 @@ namespace Cnn
                             else
                             {
                                 output[curX, curY] = 0;
-                            }  
+                            }
                         }
                     }
                 }
@@ -176,6 +281,62 @@ namespace Cnn
             }
 
             return matrix1;
+        }
+
+        public static double[,,] Flip(double[,,] input)
+        {
+            int w = input.GetLength(1);
+            int h = input.GetLength(2);
+            var output = new double[input.GetLength(0), w, h];
+            input.ForEach((q,k,i,j) => output[k, w - i - 1, h - j - 1] = q);
+            return output;
+        }
+
+        public static double[,] Flip(double[,] input)
+        {
+            int w = input.GetLength(0);
+            int h = input.GetLength(1);
+            var output = new double[w, h];
+            input.ForEach((q, i, j) => output[w - i - 1, h - j - 1] = q);
+            return output;
+        }
+
+        public static double[,,] Pad(double[,,] input, int padding)
+        {
+            int d = input.GetLength(0);
+            int w = input.GetLength(1) + padding*2;
+            int h = input.GetLength(2) + padding*2;
+
+            var output = new double[d, w, h];
+
+            input.ForEach((q, k, i, j) => output[k, i + padding, j + padding] = q);
+
+            return output;
+        }
+
+        public static double[,] Pad(double[,] input, int padding)
+        {
+            int w = input.GetLength(0) + padding * 2;
+            int h = input.GetLength(1) + padding * 2;
+
+            var output = new double[w, h];
+
+            input.ForEach((q, i, j) => output[i + padding, j + padding] = q);
+
+            return output;
+        }
+
+        public static double[,,] Unpad(double[,,] input, int padding)
+        {
+            int d = input.GetLength(0);
+            int w = input.GetLength(1) - 2 * padding;
+            int h = input.GetLength(2) - 2 * padding;
+
+            var output = new double[d, w, h];
+
+            output.ForEach((k,i,j) => output[k,i,j] = input[k, i + padding, j + padding]);
+
+            return output;
         }
     }
 }

@@ -69,6 +69,13 @@ namespace Cnn
 
         public void AddFullyConnectedLayer(int numberOfNeurons, ActivatorType activatorType)
         {
+            if(!_layers.OfType<FullyConnectedLayer>().Any())
+            {
+                var last = _layers.OfType<FilterLayer>().Last();
+                var fm = last.GetOutputFilterMeta();
+                _layers.Add(new FlattenLayer(fm.Channels, fm.Size, last.LayerIndex + 1));
+            }
+
             _layers.Add(new FullyConnectedLayer(
                 ActivatorFactory.Produce(activatorType),
                 numberOfNeurons,

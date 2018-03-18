@@ -24,7 +24,7 @@ namespace Cnn
             _weightInitializer = new WeightInitializer();
         }
 
-        public double TrainModel(double[][,] input, double[] target)
+        public double TrainModel(double[,,] input, double[] target)
         {
             var output = PassForward(new MultiValue(input));
 

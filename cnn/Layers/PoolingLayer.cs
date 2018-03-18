@@ -7,14 +7,14 @@ namespace Cnn.Layers
     internal class PoolingLayer : FilterLayer
     {
         private readonly int _kernelSize;
-        private readonly Coordinate[][] _maxValuesCoordinates;
-        private readonly double[][,] _inputMaps;
+        private readonly bool[,,] _maxValues;
+        private readonly double[,,] _inputMaps;
 
         public PoolingLayer(int kernelSize, int layerIndex, FilterMeta filterMeta) 
-            : base(layerIndex, LayerType.Pooling, filterMeta)
+            : base(layerIndex, filterMeta)
         {
-            _maxValuesCoordinates = new Coordinate[filterMeta.Channels][];
-            _inputMaps = new double[filterMeta.Channels][,];
+            _maxValues = new bool[filterMeta.Channels, filterMeta.Size, filterMeta.Size];
+            _inputMaps = new double[filterMeta.Channels, filterMeta.Size, filterMeta.Size];
             _kernelSize = kernelSize;
         }
 
@@ -35,44 +35,15 @@ namespace Cnn.Layers
 
         public override Value PassBackward(Value value)
         {
-            value = ConvertToMulti(value);
-
-            var output = new double[value.Multi.Length][,];
-
-            for (int i = 0; i < value.Multi.Length; i++)
-            {
-                output[i] = MatrixProcessor.ReverseMaxPool(
-                    value.Multi[i], 
-                    _kernelSize, 
-                    _inputMaps[0].GetLength(0), 
-                    _maxValuesCoordinates[i]);
-            }
-
+            var output = MatrixProcessor.ReverseMaxPool(value.Multi, _maxValues, _kernelSize);
             return new MultiValue(output);
         }
 
         public override Value PassForward(Value value)
         {
-            for (int i = 0; i < value.Multi.Length; i++)
-            {
-                _inputMaps[i] = new double[value.Multi[i].GetLength(0), value.Multi[i].GetLength(1)];
-            }
-
-            var output = new MultiValue(new double[value.Multi.Length][,]);
-
-            for (int i = 0; i < value.Multi.Length; i++)
-            {
-                if (value.Multi[i].GetLength(0) < _kernelSize || value.Multi[i].GetLength(1) < _kernelSize)
-                {
-                    throw new InvalidOperationException(Consts.FeatureMapMustBeBiggerThanKernel);
-                }
-
-                var res = MatrixProcessor.MaxPool(value.Multi[i], _kernelSize);
-                output.Multi[i] = res.Values;
-                _maxValuesCoordinates[i] = res.MaxCoordinates;
-            }
-
-            return output;
+            var res = MatrixProcessor.MaxPool(value.Multi, _kernelSize);
+            _maxValues.ForEach((k, i, j) => _maxValues[k, i, j] = res.Item2[k, i, j]);
+            return new MultiValue(res.Item1);
         }
     }
 }

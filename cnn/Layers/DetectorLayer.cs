@@ -7,12 +7,12 @@ namespace Cnn.Layers
     internal class DetectorLayer : FilterLayer
     {
         private readonly IActivator _activator;
-        private readonly double[][,] _featureMaps;
+        private readonly double[,,] _featureMaps;
 
         public DetectorLayer(int layerIndex, IActivator activator, FilterMeta filterMeta) 
-            : base(layerIndex, LayerType.NonLinearity, filterMeta)
+            : base(layerIndex, filterMeta)
         {
-            _featureMaps = new double[filterMeta.Channels][,];
+            _featureMaps = new double[filterMeta.Channels,filterMeta.Size, filterMeta.Size];
             _activator = activator;
         }
 
@@ -23,38 +23,18 @@ namespace Cnn.Layers
 
         public override Value PassBackward(Value value)
         {
-            value = ConvertToMulti(value);
-
-            for (int k = 0; k < value.Multi.Length; k++)
-            {
-                for (int i = 0; i < value.Multi[k].GetLength(0); i++)
-                {
-                    for (int j = 0; j < value.Multi[k].GetLength(1); j++)
-                    {
-                        value.Multi[k][i, j] = _activator.CalculateDeriviative(_featureMaps[k][i, j]) * value.Multi[k][i, j];
-                    }
-                }
-            }
+            value.Multi.ForEach((q, k, i, j) =>
+                value.Multi[k, i, j] = _activator.CalculateDeriviative(_featureMaps[k, i, j]) * value.Multi[k, i, j]);
 
             return value;
         }
 
         public override Value PassForward(Value value)
         {
-            for (int k = 0; k < value.Multi.Length; k++)
-            {
-                for (int i = 0; i < value.Multi[k].GetLength(0); i++)
-                {
-                    for (int j = 0; j < value.Multi[k].GetLength(1); j++)
-                    {
-                        value.Multi[k][i, j] = _activator.CalculateValue(value.Multi[k][i, j]);
-                    }
-                }
+            _featureMaps.ForEach((k,i,j) =>
+                _featureMaps[k,i,j] = _activator.CalculateValue(value.Multi[k,i,j]));
 
-                _featureMaps[k] = value.Multi[k];
-            }
-
-            return value;
+            return new MultiValue(_featureMaps);
         }
     }
 }

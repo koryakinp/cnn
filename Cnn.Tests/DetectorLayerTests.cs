@@ -14,15 +14,13 @@ namespace Cnn.Tests
         {
             private Layer _layer { get; set; }
 
-            private readonly MultiValue input = new MultiValue(new double[2][,]
+            private readonly MultiValue input = new MultiValue(new double[,,]
             {
-                new double[3, 3]
                 {
                     { 4, 5, 7 },
                     { -1, 4, -3 },
                     { 2, 0, -6 }
                 },
-                new double[3, 3]
                 {
                     { -10, 8, -1, },
                     {   8, -9,-7 },
@@ -30,15 +28,13 @@ namespace Cnn.Tests
                 }
             });
 
-            private readonly MultiValue delta = new MultiValue(new double[2][,]
+            private readonly MultiValue delta = new MultiValue(new double[,,]
             {
-                new double[3, 3]
                 {
                     { -2, 2, 0 },
                     { 5, -5, 1 },
                     { -8, -7, 8 }
                 },
-                new double[3, 3]
                 {
                     { 7, 3, 9, },
                     { 6, -3,-9 },
@@ -57,15 +53,13 @@ namespace Cnn.Tests
             {
                 var actual = _layer.PassForward(input);
 
-                var expected = new MultiValue(new double[2][,]
+                var expected = new MultiValue(new double[,,]
                 {
-                    new double[3,3]
                     {
                         { 0.982013, 0.993307, 0.999088 },
                         { 0.268941, 0.982013, 0.047425 },
                         { 0.880797, 0.500000, 0.002472 }
                     },
-                    new double[3,3]
                     {
                         { 0.000045, 0.999664, 0.268941 },
                         { 0.999664, 0.000123, 0.000911 },
@@ -82,15 +76,13 @@ namespace Cnn.Tests
                 _layer.PassForward(input);
                 var actual = _layer.PassBackward(delta);
 
-                var expected = new MultiValue(new double[2][,]
+                var expected = new MultiValue(new double[,,]
                 {
-                    new double[3,3]
                     {
                         { -0.035325412,  0.013296113, 0          },
                         {  0.983059666, -0.088313531, 0.04517666 },
                         { -0.839948683, -1.75,        0.01973207 },
                     },
-                    new double[3,3]
                     {
                         { 0.000317771,  0.001005713, 1.769507399  },
                         { 0.002011426, -0.000370138, -0.008191991 },

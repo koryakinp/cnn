@@ -2,57 +2,57 @@
 using Cnn.Layers.Interfaces;
 using Cnn.Misc;
 using Cnn.WeightInitializers;
+using System;
+using System.Collections.Generic;
 
 namespace Cnn.Layers
 {
     internal class ConvolutionalLayer : FilterLayer, ILearnableLayer
     {
-        private readonly Kernel[] _kernels;
-        private double[][,] _featureMaps;
+        private readonly IReadOnlyList<Kernel> _kernels;
+        private readonly double[,,] _featureMaps;
         private readonly int _kernelSize;
         private readonly int _numberOfKernels;
+        private readonly FilterMeta _inputeFm;
+        private readonly FilterMeta _outputFm;
 
-        public ConvolutionalLayer(
-            int numberOfKernels, 
-            int kernelSize, 
-            int layerIndex, 
-            FilterMeta filterMeta,
-            IWeightInitializer weightInitializer) 
-            : base(layerIndex, LayerType.Convolutional, filterMeta)
+        public ConvolutionalLayer(int nk, int ks, int li, FilterMeta ifm, IWeightInitializer wi)
+            : base(li, ifm)
         {
-            _numberOfKernels = numberOfKernels;
-            _kernelSize = kernelSize;
-            _kernels = new Kernel[_numberOfKernels];
-            for (int i = 0; i < numberOfKernels; i++)
+            _numberOfKernels = nk;
+            _kernelSize = ks;
+
+            List<Kernel> temp = new List<Kernel>();
+            for (int i = 0; i < _numberOfKernels; i++)
             {
-                var kernel = new Kernel(_kernelSize);
-                kernel.RandomizeWeights(weightInitializer);
-                _kernels[i] = kernel;
+                var k = new Kernel(ks, ifm.Channels);
+                k.RandomizeWeights(wi);
+                temp.Add(k);
             }
+
+            _kernels = new List<Kernel>(temp);
+
+            _inputeFm = ifm;
+            _outputFm = GetOutputFilterMeta();
+            _featureMaps = new double[_outputFm.Channels, _outputFm.Size, _outputFm.Size];
         }
 
         public override Value PassBackward(Value value)
         {
-            value = ConvertToMulti(value);
+            var output = new double[_inputeFm.Channels, _inputeFm.Size, _inputeFm.Size];
 
-            double[][,] output = new double[_kernels.Length][,];
-
-            for (int i = 0; i < _kernels.Length; i++)
+            for (int i = 0; i < _numberOfKernels; i++)
             {
-                var kernel = _kernels[i];
-                output[i] = new double[_kernelSize, _kernelSize];
-                for (int j = 0; j < _featureMaps.Length; j++)
-                {
-                    var delta = MatrixProcessor.Convolute(_featureMaps[j], value.Multi[i * _kernels.Length + j]);
-                    output[i] = MatrixProcessor.Add(output[i], delta);
-                }
+                var kernel = value.Multi.GetSlice(i);
+                kernel = MatrixProcessor.Pad(kernel, _kernelSize - 1);
 
-                for (int q = 0; q < kernel.Gradient.GetLength(0); q++)
+                for (int j = 0; j < _inputeFm.Channels; j++)
                 {
-                    for (int w = 0; w < kernel.Gradient.GetLength(1); w++)
-                    {
-                        kernel.Gradient[q, w] = output[i][q,w];
-                    }
+                    var weight = _kernels[i].Weights.GetSlice(j);
+                    weight = MatrixProcessor.Flip(weight);
+                    var conv = MatrixProcessor.Convolute(kernel, weight);
+
+                    conv.ForEach((q, ii, jj) => output[j, ii, jj] += q);
                 }
             }
 
@@ -61,65 +61,41 @@ namespace Cnn.Layers
 
         public override Value PassForward(Value value)
         {
-            _featureMaps = value.Multi;
-            var output = new double[value.Multi.Length * _kernels.Length][,];
-            for (int i = 0; i < _kernels.Length; i++)
+            for (int i = 0; i < _kernels.Count; i++)
             {
-                for (int j = 0; j < value.Multi.Length; j++)
-                {
-                    output[i * value.Multi.Length + j] = 
-                        MatrixProcessor.Convolute(value.Multi[j], _kernels[i].Weights);
-
-                    for (int z = 0; z < output[i * value.Multi.Length + j].GetLength(0); z++)
-                    {
-                        for (int k = 0; k < output[i * value.Multi.Length + j].GetLength(1); k++)
-                        {
-                            output[i * value.Multi.Length + j][z, k] += _kernels[i].Bias;
-                        }
-                    }
-                }
+                MatrixProcessor
+                    .Convolute(value.Multi, _kernels[i].Weights)
+                    .ForEach((q, j, k) => _featureMaps[i, j, k] = q);
             }
 
-            return new MultiValue(output);
+            return new MultiValue(_featureMaps);
         }
 
         public override FilterMeta GetOutputFilterMeta()
         {
-            return new FilterMeta(
-                InputFilterMeta.Size - _kernelSize + 1, 
-                InputFilterMeta.Channels * _numberOfKernels);
+            return new FilterMeta(InputFilterMeta.Size - _kernelSize + 1, _numberOfKernels);
         }
 
         public void UpdateWeights(double learningRate)
         {
-            foreach (var kernel in _kernels)
-            {
-                for (int i = 0; i < kernel.Weights.GetLength(0); i++)
-                {
-                    for (int j = 0; j < kernel.Weights.GetLength(1); j++)
-                    {
-                        kernel.Weights[i, j] += kernel.Weights[i, j] * kernel.Gradient[i, j] * learningRate;
-                    }
-                }
-            }
+            throw new NotImplementedException();
         }
 
         public void UpdateBiases(double learningRate)
         {
-            foreach (var kernel in _kernels)
+            throw new NotImplementedException();
+        }
+
+        private class WeightGradient
+        {
+            public WeightGradient(double[,,] weights, double[,,] gradients)
             {
-                double biasDelta = 0;
-
-                for (int i = 0; i < kernel.Gradient.GetLength(0); i++)
-                {
-                    for (int j = 0; j < kernel.Gradient.GetLength(1); j++)
-                    {
-                        biasDelta += kernel.Gradient[i, j];
-                    }
-                }
-
-                kernel.Bias += biasDelta * learningRate;
+                Weights = weights;
+                Gradients = gradients;
             }
+
+            public readonly double[,,] Weights;
+            public readonly double[,,] Gradients;
         }
     }
 }

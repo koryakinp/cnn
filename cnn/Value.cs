@@ -5,7 +5,7 @@ namespace Cnn
     public abstract class Value
     {
         internal readonly double[] Single;
-        internal readonly double[][,] Multi;
+        internal readonly double[,,] Multi;
         internal readonly bool IsMulti;
 
         protected Value(double[] value)
@@ -14,7 +14,7 @@ namespace Cnn
             IsMulti = false;
         }
 
-        protected Value(double[][,] value)
+        protected Value(double[,,] value)
         {
             Multi = value;
             IsMulti = true;
@@ -27,38 +27,31 @@ namespace Cnn
                 throw new Exception(Consts.CanNotConvertMultiValueToSingleValue);
             }
 
-            double[] output = new double[Multi.Length * Multi[0].GetLength(0) * Multi[0].GetLength(1)];
-            for (int i = 0; i < Multi.Length; i++)
-            {
-                for (int j = 0; j < Multi[i].GetLength(0); j++)
-                {
-                    for (int k = 0; k < Multi[i].GetLength(1); k++)
-                    {
-                        int depth = Multi.Length;
-                        int width = Multi[i].GetLength(0);
-                        int height = Multi[i].GetLength(1);
+            double[] output = new double[Multi.Length * Multi.GetLength(1) * Multi.GetLength(1)];
 
-                        output[i * width * height + j * width + k] = Multi[i][j, k];
-                    }
-                }
-            }
+            Multi.ForEach((i, j, k) =>
+            {
+                int depth = Multi.GetLength(0);
+                int width = Multi.GetLength(1);
+                int height = Multi.GetLength(2);
+
+                output[i * width * height + j * width + k] = Multi[i, j, k];
+            });
 
             return new SingleValue(output);
         }
 
         public MultiValue ToMulti(int size, int channels)
         {
-            var output = new double[channels][,];
+            var output = new double[channels,size,size];
 
             for (int i = 0; i < output.Length; i++)
             {
-                output[i] = new double[size, size];
-
                 for (int j = 0; j < size; j++)
                 {
                     for (int k = 0; k < size; k++)
                     {
-                        output[i][j, k] = Single[i * size * size + j * size + k];
+                        output[i,j,k] = Single[i * size * size + j * size + k];
                     }
                 }
             }
@@ -74,6 +67,6 @@ namespace Cnn
 
     public class MultiValue : Value
     {
-        public MultiValue(double[][,] value) : base(value) {}
+        public MultiValue(double[,,] value) : base(value) {}
     }
 }
