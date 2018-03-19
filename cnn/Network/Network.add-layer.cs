@@ -1,6 +1,7 @@
 ﻿using Cnn.Activators;
 using Cnn.Layers;
 using Cnn.Layers.Abstract;
+using Cnn.LearningRateAnnealers;
 using Cnn.Misc;
 using Cnn.WeightInitializers;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Cnn
 {
     public partial class Network
     {
-        public void AddConvolutionalLayer(int numberOfKernels, int kernelSize)
+        public void AddConvolutionalLayer(int numberOfKernels, int kernelSize, LearningRateAnnealerType annealerType)
         {
             if (_layers.Any())
             {
@@ -18,7 +19,8 @@ namespace Cnn
                     kernelSize,
                     _layers.Last().LayerIndex + 1,
                     _layers.OfType<FilterLayer>().Last().GetOutputFilterMeta(),
-                    new WeightInitializer()));
+                    new WeightInitializer(),
+                    annealerType));
             }
             else
             {
@@ -27,7 +29,8 @@ namespace Cnn
                     kernelSize,
                     1,
                     new FilterMeta(_networkConfig.InputDimenision, _networkConfig.InputChannels),
-                    new WeightInitializer()));
+                    new WeightInitializer(),
+                    annealerType));
             }
         }
 

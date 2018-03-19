@@ -1,6 +1,6 @@
 ﻿using Cnn.Activators;
 using Cnn.WeightInitializers;
-using System.Collections.Generic;
+using System;
 
 namespace Cnn.Neurons
 {
@@ -9,16 +9,14 @@ namespace Cnn.Neurons
         public double Output { get; private set; }
         public double Bias { get; set; }
         public double Delta { get; private set; }
+        public readonly double[] Weights;
         private readonly IActivator _activator;
 
-        public readonly IReadOnlyList<Connection> BackwardConnections;
-
-        public Neuron(
-            IActivator activator, 
-            IWeightInitializer weightInitializer, 
-            int numberOfConnections)
+        public Neuron(IActivator activator, IWeightInitializer weightInitializer, int numberOfConnections)
         {
-            BackwardConnections = Utils.CreateConnections(numberOfConnections, weightInitializer);
+            Weights = new double[numberOfConnections];
+            double magnitude = 1 / Math.Sqrt(numberOfConnections);
+            Weights.ForEach((q, i) => Weights[i] = weightInitializer.GenerateRandom(magnitude));
             _activator = activator;
         }
 

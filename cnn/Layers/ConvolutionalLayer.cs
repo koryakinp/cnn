@@ -1,5 +1,6 @@
 ﻿using Cnn.Layers.Abstract;
 using Cnn.Layers.Interfaces;
+using Cnn.LearningRateAnnealers;
 using Cnn.Misc;
 using Cnn.WeightInitializers;
 using System;
@@ -16,7 +17,7 @@ namespace Cnn.Layers
         private readonly FilterMeta _inputeFm;
         private readonly FilterMeta _outputFm;
 
-        public ConvolutionalLayer(int nk, int ks, int li, FilterMeta ifm, IWeightInitializer wi)
+        public ConvolutionalLayer(int nk, int ks, int li, FilterMeta ifm, IWeightInitializer wi, LearningRateAnnealerType lrat)
             : base(li, ifm)
         {
             _numberOfKernels = nk;
@@ -25,13 +26,12 @@ namespace Cnn.Layers
             List<Kernel> temp = new List<Kernel>();
             for (int i = 0; i < _numberOfKernels; i++)
             {
-                var k = new Kernel(ks, ifm.Channels);
+                var k = new Kernel(ks, ifm.Channels, lrat);
                 k.RandomizeWeights(wi);
                 temp.Add(k);
             }
 
             _kernels = new List<Kernel>(temp);
-
             _inputeFm = ifm;
             _outputFm = GetOutputFilterMeta();
             _featureMaps = new double[_outputFm.Channels, _outputFm.Size, _outputFm.Size];
@@ -78,24 +78,12 @@ namespace Cnn.Layers
 
         public void UpdateWeights(double learningRate)
         {
-            throw new NotImplementedException();
+            _kernels.ForEach(q => q.UpdateWeights());
         }
 
         public void UpdateBiases(double learningRate)
         {
-            throw new NotImplementedException();
-        }
-
-        private class WeightGradient
-        {
-            public WeightGradient(double[,,] weights, double[,,] gradients)
-            {
-                Weights = weights;
-                Gradients = gradients;
-            }
-
-            public readonly double[,,] Weights;
-            public readonly double[,,] Gradients;
+            _kernels.ForEach(q => q.UpdateBias());
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Cnn.Layers
     internal class FullyConnectedLayer : Layer, ILearnableLayer
     {
         public readonly IReadOnlyList<Neuron> Neurons;
+        private int _numberOfNeuronsInPreviouseLayer;
 
         public FullyConnectedLayer(
             IActivator activator, 
@@ -21,25 +22,24 @@ namespace Cnn.Layers
             IWeightInitializer weightInitializer) 
             : base(layerIndex)
         {
-            Neurons = Utils.CreateNeurons(
-                numberOfNeurons, 
-                numberOfNeuronsInPreviouseLayer, 
-                activator,
-                weightInitializer);
+            _numberOfNeuronsInPreviouseLayer = numberOfNeuronsInPreviouseLayer;
+
+            List<Neuron> neurons = new List<Neuron>();
+            for (int i = 0; i < numberOfNeurons; i++)
+            {
+                neurons.Add(new Neuron(activator, weightInitializer, numberOfNeuronsInPreviouseLayer));
+            }
+
+            Neurons = new List<Neuron>(neurons);
         }
 
         public override Value PassForward(Value value)
         {
-            if(value.IsMulti)
-            {
-                value = value.ToSingle();
-            }
-
             foreach (var neuron in Neurons)
             {
                 double weightedSum = neuron
-                    .BackwardConnections
-                    .Select((w, j) => value.Single[j] * w.Weight)
+                    .Weights
+                    .Select((w, j) => value.Single[j] * w)
                     .Sum();
 
                 neuron.ComputeOutput(weightedSum);
@@ -51,12 +51,12 @@ namespace Cnn.Layers
         public override Value PassBackward(Value value)
         {
             Neurons.ForEach((q, i) => q.ComputeDelta(value.Single[i]));
-            double[] deltas = new double[Neurons.First().BackwardConnections.Count];
+            double[] deltas = new double[_numberOfNeuronsInPreviouseLayer];
             foreach (var neuron in Neurons)
             {
                 neuron
-                    .BackwardConnections
-                    .ForEach((q, i) => deltas[i] += q.Weight * neuron.Delta);
+                    .Weights
+                    .ForEach((q, i) => deltas[i] += q * neuron.Delta);
             }
 
             return new SingleValue(deltas);
@@ -71,10 +71,7 @@ namespace Cnn.Layers
         {
             foreach (var neuron in Neurons)
             {
-                foreach (var connection in neuron.BackwardConnections)
-                {
-                    connection.Weight += connection.Weight * neuron.Delta * learningRate;
-                }
+                neuron.Weights.ForEach((q, i) => neuron.Weights[i] += neuron.Weights[i] * neuron.Delta * learningRate);
             }
         }
 

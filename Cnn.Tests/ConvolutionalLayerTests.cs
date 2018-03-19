@@ -2,6 +2,7 @@ namespace Cnn.Tests
 {
     using global::Cnn.Layers;
     using global::Cnn.Layers.Abstract;
+    using global::Cnn.LearningRateAnnealers;
     using global::Cnn.Misc;
     using global::Cnn.WeightInitializers;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -110,7 +111,7 @@ namespace Cnn.Tests
                     .Setup(q => q.GenerateRandom(It.IsAny<double>()))
                     .Returns(queue.Dequeue);
 
-                _layer = new ConvolutionalLayer(3, 3, 1, new FilterMeta(5, 2), mock.Object);
+                _layer = new ConvolutionalLayer(3, 3, 1, new FilterMeta(5, 2), mock.Object, LearningRateAnnealerType.Adagrad);
             }
 
             [TestMethod]
