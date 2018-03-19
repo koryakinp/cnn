@@ -23,8 +23,8 @@ namespace Cnn.Example
             network.AddConvolutionalLayer(5,3, LearningRateAnnealerType.Adagrad);
             network.AddPoolingLayer(2);
             network.AddDetectorLayer(ActivatorType.LogisticActivator);
-            network.AddFullyConnectedLayer(5, ActivatorType.LogisticActivator);
-            network.AddFullyConnectedLayer(4, ActivatorType.LogisticActivator);
+            network.AddFullyConnectedLayer(5, ActivatorType.LogisticActivator, LearningRateAnnealerType.Adagrad);
+            network.AddFullyConnectedLayer(4, ActivatorType.LogisticActivator, LearningRateAnnealerType.Adagrad);
 
             foreach (var item in MnistReader.ReadTrainingData())
             {

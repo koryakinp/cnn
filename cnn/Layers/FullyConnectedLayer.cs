@@ -6,6 +6,7 @@ using Cnn.WeightInitializers;
 using System.Collections.Generic;
 using System.Linq;
 using Cnn.Layers.Interfaces;
+using Cnn.LearningRateAnnealers;
 
 namespace Cnn.Layers
 {
@@ -19,7 +20,8 @@ namespace Cnn.Layers
             int numberOfNeurons, 
             int numberOfNeuronsInPreviouseLayer,
             int layerIndex,
-            IWeightInitializer weightInitializer) 
+            IWeightInitializer weightInitializer,
+            LearningRateAnnealerType lrat) 
             : base(layerIndex)
         {
             _numberOfNeuronsInPreviouseLayer = numberOfNeuronsInPreviouseLayer;
@@ -27,7 +29,7 @@ namespace Cnn.Layers
             List<Neuron> neurons = new List<Neuron>();
             for (int i = 0; i < numberOfNeurons; i++)
             {
-                neurons.Add(new Neuron(activator, weightInitializer, numberOfNeuronsInPreviouseLayer));
+                neurons.Add(new Neuron(activator, weightInitializer, numberOfNeuronsInPreviouseLayer, lrat));
             }
 
             Neurons = new List<Neuron>(neurons);
@@ -62,25 +64,16 @@ namespace Cnn.Layers
             return new SingleValue(deltas);
         }
 
-        public override int GetNumberOfOutputValues()
-        {
-            return Neurons.Count;
-        }
+        public override int GetNumberOfOutputValues() => Neurons.Count;
 
         public void UpdateWeights(double learningRate)
         {
-            foreach (var neuron in Neurons)
-            {
-                neuron.Weights.ForEach((q, i) => neuron.Weights[i] += neuron.Weights[i] * neuron.Delta * learningRate);
-            }
+            Neurons.ForEach(q => q.UpdateWeights());
         }
 
         public void UpdateBiases(double learningRate)
         {
-            foreach (var neuron in Neurons)
-            {
-                neuron.Bias += neuron.Delta * learningRate;
-            }
+            Neurons.ForEach(q => q.UpdateBias());
         }
     }
 }

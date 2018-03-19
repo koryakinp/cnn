@@ -17,6 +17,7 @@ namespace Cnn
         {
             _learningRateAnnealers = new ILearningRateAnnealer[depth, size, size];
             _learningRateAnnealers.ForEach((i, j, k) => _learningRateAnnealers[i, j, k] = LearningRateAnnealerFactory.Produce(type));
+            _biasLearningRateAnnealer = LearningRateAnnealerFactory.Produce(type);
             Weights = new double[depth, size, size];
             Gradient = new double[depth, size, size];
         }

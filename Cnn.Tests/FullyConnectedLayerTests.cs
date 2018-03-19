@@ -37,7 +37,7 @@ namespace Cnn.Tests
                     .Returns(queue.Dequeue);
 
                 _layer = new FullyConnectedLayer(
-                    new LogisticActivator(), 3, 5, 1, mock.Object);
+                    new LogisticActivator(), 3, 5, 1, mock.Object, LearningRateAnnealers.LearningRateAnnealerType.Adagrad);
             }
 
             [TestMethod]

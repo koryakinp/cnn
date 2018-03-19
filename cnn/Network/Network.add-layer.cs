@@ -70,7 +70,7 @@ namespace Cnn
             }
         }
 
-        public void AddFullyConnectedLayer(int numberOfNeurons, ActivatorType activatorType)
+        public void AddFullyConnectedLayer(int numberOfNeurons, ActivatorType activatorType, LearningRateAnnealerType lrat)
         {
             if(!_layers.OfType<FullyConnectedLayer>().Any())
             {
@@ -84,7 +84,8 @@ namespace Cnn
                 numberOfNeurons,
                 _layers.Last().GetNumberOfOutputValues(),
                 _layers.Last().LayerIndex + 1,
-                _weightInitializer));
+                _weightInitializer,
+                lrat));
         }
     }
 }
