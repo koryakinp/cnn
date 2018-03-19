@@ -27,7 +27,7 @@ namespace Cnn
                 throw new Exception(Consts.CanNotConvertMultiValueToSingleValue);
             }
 
-            double[] output = new double[Multi.Length * Multi.GetLength(1) * Multi.GetLength(1)];
+            double[] output = new double[Multi.Length];
 
             Multi.ForEach((i, j, k) =>
             {
@@ -45,7 +45,7 @@ namespace Cnn
         {
             var output = new double[channels,size,size];
 
-            for (int i = 0; i < output.Length; i++)
+            for (int i = 0; i < output.GetLength(0); i++)
             {
                 for (int j = 0; j < size; j++)
                 {

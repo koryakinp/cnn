@@ -34,7 +34,7 @@ namespace Cnn.Example
                 {
                     for (int j = 0; j < data.GetLength(1); j++)
                     {
-                        input[1, i, j] = data[i, j];
+                        input[0, i, j] = data[i, j];
                     }
                 }
 
